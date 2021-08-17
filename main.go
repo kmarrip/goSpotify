@@ -24,7 +24,7 @@ func main() {
 		panic("error reading env file")
 	}
 
-	http.HandleFunc("/callback", handler.TokenHandler)
+	http.HandleFunc("/callback/", handler.TokenHandler)
 	http.HandleFunc("/", handler.BaseHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -1,6 +1,7 @@
 package token
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -9,7 +10,15 @@ import (
 	"strings"
 )
 
-func GetTokenFromSpotify(code string) {
+type tokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    string `json:"expires_in"`
+	Scope        string `json:"scope"`
+}
+
+func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	//now we take the clientid, client secret and auth code to exchange it for the access token and refresh token
 	tokenUrl := os.Getenv("tokenUrl")
 	const grantType = "authorization_code"
@@ -24,14 +33,17 @@ func GetTokenFromSpotify(code string) {
 	form.Add("code", code)
 	form.Add("redirect_uri", redirectUri)
 	resp, err := http.Post(tokenUrl, contentType, strings.NewReader(form.Encode()))
+	emptyTokenResponse := tokenResponse{}
 	if err != nil {
-		panic("couldn't make post request to token endpoint")
+		return emptyTokenResponse, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return emptyTokenResponse, err
 	}
-	fmt.Println(string(body))
+	responsePayload := &tokenResponse{}
+	json.Unmarshal(body, responsePayload)
+	return *responsePayload, nil
 }
