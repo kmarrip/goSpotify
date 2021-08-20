@@ -23,16 +23,18 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	//use this token cookie, to make requests to the spotify api
 	accessToken := tokenCookie.Value
 	name, err := spotify.CallSpotifyMe(accessToken)
+	if err != nil {
+		return
+	}
 	song, errr := spotify.CallSpotifyCurrentSong(accessToken)
 	if errr != nil {
 		return
 	}
-	fmt.Println(song)
-	if err != nil {
-		return
+	formString := "name is %v\n"
+	if song != "" {
+		formString += "currently listening to %v"
 	}
-	fmt.Println(name)
-	fmt.Fprintf(w, "name is %v", name)
+	fmt.Fprintf(w, formString, name, song)
 }
 
 func TokenHandler(w http.ResponseWriter, r *http.Request) {

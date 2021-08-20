@@ -5,7 +5,6 @@ package spotify
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -38,10 +37,6 @@ func CallSpotifyCurrentSong(token string) (string, error) {
 	}
 	var responsePayload currentSong
 	json.Unmarshal(body, &responsePayload)
-	fmt.Println(responsePayload)
-	fmt.Println(responsePayload.Item)
-	fmt.Println(responsePayload.Item.Album)
-	fmt.Println(responsePayload.Item.Album.Name)
 	return responsePayload.Item.Album.Name, nil
 }
 func CallSpotifyMe(token string) (string, error) {
