@@ -21,7 +21,7 @@ func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		fmt.Println(err)
-		panic("error reading env file")
+		fmt.Println("can't read env files, env should have already been set")
 	}
 
 	http.HandleFunc("/callback/", handler.TokenHandler)
