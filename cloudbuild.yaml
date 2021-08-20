@@ -1,0 +1,25 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/cowinbot-321814/github.com/chaithanyamarripati/gospotify:$SHORT_SHA",
+        ".",
+      ]
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "push",
+        "gcr.io/cowinbot-321814/github.com/chaithanyamarripati/gospotify:$SHORT_SHA",
+      ]
+  - name: "gcr.io/cloud-builders/gcloud"
+    args:
+      [
+        "run",
+        "deploy",
+        "cowinbot",
+        "--region=asia-south1",
+        "--platform=managed",
+        "--image=gcr.io/cowinbot-321814/github.com/chaithanyamarripati/gospotify:$SHORT_SHA",
+      ]
