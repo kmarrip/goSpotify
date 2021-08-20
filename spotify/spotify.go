@@ -30,6 +30,9 @@ func CallSpotifyCurrentSong(token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if res.StatusCode != http.StatusOK {
+		return "", nil
+	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

@@ -27,14 +27,15 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	song, errr := spotify.CallSpotifyCurrentSong(accessToken)
+	fmt.Println(song)
 	if errr != nil {
 		return
 	}
-	formString := "name is %v\n"
-	if song != "" {
-		formString += "currently listening to %v"
+	if song == "" {
+		fmt.Fprintf(w, "name is %v", name)
+		return
 	}
-	fmt.Fprintf(w, formString, name, song)
+	fmt.Fprintf(w, "name is %v\ncurrently listening to %v", name, song)
 }
 
 func TokenHandler(w http.ResponseWriter, r *http.Request) {
