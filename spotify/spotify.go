@@ -7,7 +7,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"os"
+
+	"github.com/chaithanyaMarripati/goSpotify/config"
 )
 
 type meSpotify struct {
@@ -22,7 +23,7 @@ type currentSong struct {
 }
 
 func CallSpotifyCurrentSong(token string) (string, error) {
-	getCurrentSpotify := os.Getenv("currentlyPlaying")
+	getCurrentSpotify := config.EnvVariables.GetMeSpotify
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getCurrentSpotify, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
@@ -44,7 +45,7 @@ func CallSpotifyCurrentSong(token string) (string, error) {
 }
 func CallSpotifyMe(token string) (string, error) {
 	//call the spotify api for user name and current song
-	getUserSpotify := os.Getenv("getMeSpotify")
+	getUserSpotify := config.EnvVariables.GetMeSpotify
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getUserSpotify, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
