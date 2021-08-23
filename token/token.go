@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
+
+	"github.com/chaithanyaMarripati/goSpotify/config"
 )
 
 type tokenResponse struct {
@@ -20,12 +21,12 @@ type tokenResponse struct {
 
 func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	//now we take the clientid, client secret and auth code to exchange it for the access token and refresh token
-	tokenUrl := os.Getenv("tokenUrl")
+	tokenUrl := config.EnvVariables.TokenUrl
 	const grantType = "authorization_code"
 	const contentType = "application/x-www-form-urlencoded"
-	clientId := os.Getenv("clientId")
-	clientSecret := os.Getenv("clientSecret")
-	redirectUri := os.Getenv("redirectUri")
+	clientId := config.EnvVariables.ClientId
+	clientSecret := config.EnvVariables.ClientSecret
+	redirectUri := config.EnvVariables.RedirectUri
 	form := url.Values{}
 	form.Add("client_id", clientId)
 	form.Add("client_secret", clientSecret)
