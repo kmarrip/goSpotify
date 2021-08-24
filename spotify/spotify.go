@@ -23,7 +23,7 @@ type currentSong struct {
 }
 
 func CallSpotifyCurrentSong(token string) (string, error) {
-	getCurrentSpotify := config.EnvVariables.GetMeSpotify
+	getCurrentSpotify := config.EnvVariables.CurrentlyPlaying
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getCurrentSpotify, nil)
 	req.Header.Set("Authorization", "Bearer "+token)
