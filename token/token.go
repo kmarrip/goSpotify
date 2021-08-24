@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/chaithanyaMarripati/goSpotify/config"
 )
@@ -15,8 +16,9 @@ type tokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
-	ExpiresIn    string `json:"expires_in"`
+	ExpiresIn    int64  `json:"expires_in"`
 	Scope        string `json:"scope"`
+	ExpiresAt    string `json:"expiresAt"`
 }
 
 func GetTokenFromSpotify(code string) (tokenResponse, error) {
@@ -46,5 +48,7 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	}
 	responsePayload := &tokenResponse{}
 	json.Unmarshal(body, responsePayload)
+	currentTime := time.Now().Add(time.Duration(responsePayload.ExpiresIn)).Format(time.RFC3339)
+	responsePayload.ExpiresAt = currentTime
 	return *responsePayload, nil
 }

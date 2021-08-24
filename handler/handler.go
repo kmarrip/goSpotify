@@ -58,7 +58,14 @@ func TokenHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		SameSite: http.SameSiteDefaultMode,
 	}
+	expiresAtCookie := &http.Cookie{
+		Name:     "ExpAt",
+		Value:    token.ExpiresAt,
+		Path:     "/",
+		SameSite: http.SameSiteDefaultMode,
+	}
 	http.SetCookie(w, accessTokenCookie)
 	http.SetCookie(w, refreshTokenCookie)
+	http.SetCookie(w, expiresAtCookie)
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
