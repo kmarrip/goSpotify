@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/chaithanyaMarripati/goSpotify/config"
 	"github.com/chaithanyaMarripati/goSpotify/handler"
 	"github.com/joho/godotenv"
 )
@@ -23,7 +24,7 @@ func main() {
 		fmt.Println(err)
 		fmt.Println("can't read env files, env should have already been set")
 	}
-
+	config.SetConfigVar()
 	http.HandleFunc("/callback/", handler.TokenHandler)
 	http.HandleFunc("/", handler.BaseHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
