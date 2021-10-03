@@ -3,6 +3,8 @@
 [![GitHub issues](https://img.shields.io/github/issues/chaithanyaMarripati/goSpotify)](https://github.com/chaithanyaMarripati/goSpotify/issues)
 ### goSpotify uses Oauth2 to authorize the users with their spotify account and returns the song/album currently being played
 
+## join [goSpotify](https://discord.gg/vQUaPhbp) discord server
+
 # QuickStart
 1. [Install Docker](https://docs.docker.com/engine/install/).
 2. Run the build command
