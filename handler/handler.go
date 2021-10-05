@@ -2,6 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
@@ -24,11 +26,13 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 	accessToken := tokenCookie.Value
 	name, err := spotify.CallSpotifyMe(accessToken)
 	if err != nil {
+		log.Panic(err)
 		return
 	}
-	song, errr := spotify.CallSpotifyCurrentSong(accessToken)
-	fmt.Println(song)
-	if errr != nil {
+
+	song, err := spotify.CallSpotifyCurrentSong(accessToken)
+	if err != nil {
+		log.Panic(err)
 		return
 	}
 	if song == "" {
@@ -39,26 +43,34 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TokenHandler(w http.ResponseWriter, r *http.Request) {
-	authCode := r.URL.Query()["code"][0]
-	//now that we got the code exchange it with access token and refresh token and redirect with set cookie
-	token, err := token.GetTokenFromSpotify(authCode)
-	if err != nil {
-		fmt.Fprintf(w, "faced and issue with token generation")
-		return
+	errorCode := r.URL.Query()["error"]
+	if len(errorCode) > 0 {
+		t := template.Must(template.ParseFiles("./templates/unauthorized.html"))
+		t.Execute(w, nil)
+	} else {
+		authCode := r.URL.Query()["code"][0]
+
+		//now that we got the code exchange it with access token and refresh token and redirect with set cookie
+		token, err := token.GetTokenFromSpotify(authCode)
+		if err != nil {
+			fmt.Fprintf(w, "faced and issue with token generation")
+			return
+		}
+		accessTokenCookie := &http.Cookie{
+			Name:     "Token",
+			Value:    token.AccessToken,
+			Path:     "/",
+			SameSite: http.SameSiteDefaultMode,
+		}
+		refreshTokenCookie := &http.Cookie{
+			Name:     "RefreshToken",
+			Value:    token.RefreshToken,
+			Path:     "/",
+			SameSite: http.SameSiteDefaultMode,
+		}
+		http.SetCookie(w, accessTokenCookie)
+		http.SetCookie(w, refreshTokenCookie)
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	}
-	accessTokenCookie := &http.Cookie{
-		Name:     "Token",
-		Value:    token.AccessToken,
-		Path:     "/",
-		SameSite: http.SameSiteDefaultMode,
-	}
-	refreshTokenCookie := &http.Cookie{
-		Name:     "RefreshToken",
-		Value:    token.RefreshToken,
-		Path:     "/",
-		SameSite: http.SameSiteDefaultMode,
-	}
-	http.SetCookie(w, accessTokenCookie)
-	http.SetCookie(w, refreshTokenCookie)
-	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+
 }

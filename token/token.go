@@ -20,20 +20,25 @@ type tokenResponse struct {
 }
 
 func GetTokenFromSpotify(code string) (tokenResponse, error) {
-	//now we take the clientid, client secret and auth code to exchange it for the access token and refresh token
+
 	tokenUrl := config.EnvVariables.TokenUrl
+
+	//now we take the clientid, client secret and auth code to exchange it for the access token and refresh token
 	const grantType = "authorization_code"
 	const contentType = "application/x-www-form-urlencoded"
 	clientId := config.EnvVariables.ClientId
 	clientSecret := config.EnvVariables.ClientSecret
+
 	redirectUri := config.EnvVariables.RedirectUri
 	form := url.Values{}
-	form.Add("client_id", clientId)
-	form.Add("client_secret", clientSecret)
 	form.Add("grant_type", grantType)
 	form.Add("code", code)
 	form.Add("redirect_uri", redirectUri)
+	form.Add("client_id", clientId)
+	form.Add("client_secret", clientSecret)
+
 	resp, err := http.Post(tokenUrl, contentType, strings.NewReader(form.Encode()))
+
 	emptyTokenResponse := tokenResponse{}
 	if err != nil {
 		return emptyTokenResponse, err
@@ -44,6 +49,7 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 		fmt.Println(err)
 		return emptyTokenResponse, err
 	}
+
 	responsePayload := &tokenResponse{}
 	json.Unmarshal(body, responsePayload)
 	return *responsePayload, nil

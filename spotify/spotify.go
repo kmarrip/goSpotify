@@ -34,11 +34,13 @@ func CallSpotifyCurrentSong(token string) (string, error) {
 	if res.StatusCode != http.StatusOK {
 		return "", nil
 	}
+
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
+
 	var responsePayload currentSong
 	json.Unmarshal(body, &responsePayload)
 	return responsePayload.Item.Album.Name, nil
@@ -53,11 +55,13 @@ func CallSpotifyMe(token string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}
+
 	responsePayload := &meSpotify{}
 	json.Unmarshal(body, responsePayload)
 	return responsePayload.DisplayName, nil
