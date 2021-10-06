@@ -1,7 +1,7 @@
 package authorize
 
 import (
-	"fmt"
+	"log"
 	"net/url"
 
 	"github.com/chaithanyaMarripati/goSpotify/config"
@@ -11,16 +11,13 @@ import (
 //here the scopes for the auth request are handled
 
 func ConstructAuthorizeReq() string {
-	fmt.Println("constructing the authorize request with scopes")
-	scopes := config.EnvVariables.Scopes
+	log.Println("constructing the authorize request with scopes")
+
 	baseUrl := config.EnvVariables.BaseUrl
-	clientId := config.EnvVariables.ClientId
-	const responseType = "code"
-	redirectUri := config.EnvVariables.RedirectUri
 	params := url.Values{}
-	params.Add("client_id", clientId)
-	params.Add("response_type", responseType)
-	params.Add("redirect_uri", redirectUri)
-	params.Add("scope", scopes)
+	params.Add("response_type", "code")
+	params.Add("client_id", config.EnvVariables.ClientId)
+	params.Add("redirect_uri", config.EnvVariables.RedirectUri)
+	params.Add("scope", config.EnvVariables.Scopes)
 	return baseUrl + params.Encode()
 }

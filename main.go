@@ -9,7 +9,6 @@ package main
 //6) now the user is redirected to "/" with access token, now user is given with a html page, with his name and all
 //end of project
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -21,11 +20,11 @@ import (
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println("can't read env files, env should have already been set")
+		log.Println(err)
+		log.Println("can't read env files, env should have already been set")
 	}
 	config.SetConfigVar()
-	http.HandleFunc("/callback/", handler.TokenHandler)
+	http.HandleFunc("/callback", handler.TokenHandler)
 	http.HandleFunc("/", handler.BaseHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

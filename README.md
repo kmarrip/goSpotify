@@ -7,14 +7,28 @@
 
 # QuickStart
 1. [Install Docker](https://docs.docker.com/engine/install/).
-2. Run the build command
+2. Go to https://developer.spotify.com/ and login/register
+3. In dashboard add a new app, so in `edit settings` add this redirect url http://localhost:8080/callback
+4. Get your client id and client secret and create .env file like this: 
    ```
-   docker build -t gospotify:latest .
+      baseUrl=https://accounts.spotify.com/authorize?
+      clientId=your-client-id
+      clientSecret=your-client-secret
+      redirectUrl=http://localhost:8080/callback
+      scopes=user-read-playback-state
+      tokenUrl=https://accounts.spotify.com/api/token
+      getMeSpotify=https://api.spotify.com/v1/me
+      currentlyPlaying=https://api.spotify.com/v1/me/player/
    ```
-3. Run the start command
+5. Run the start command
    ```
    docker run -p 8080:8080 gospotify:latest
    ```
+6. Run the build command
+   ```
+   docker build -t gospotify:latest .
+   ```
+
 # Todo list 
 these are the pending action items, list will be updated overtime
 - [ ] Add state in the url parmas when the user is redirected, to protect against csrf attacks
