@@ -20,20 +20,21 @@
       getMeSpotify=https://api.spotify.com/v1/me
       currentlyPlaying=https://api.spotify.com/v1/me/player/
    ```
-5. Run the start command
+5. Run the build command
+   ```
+   docker build -t gospotify:latest .
+   ```  
+6. Run the start command
    ```
    docker run -p 8080:8080 gospotify:latest
    ```
-6. Run the build command
-   ```
-   docker build -t gospotify:latest .
-   ```
+
 
 # Todo list 
 these are the pending action items, list will be updated overtime
 - [ ] Add state in the url parmas when the user is redirected, to protect against csrf attacks
 - [ ] After successful authentication return a html page instead of text
-- [ ] Add error page for errors during /authorize step 
+- [x] Add error page for errors during /authorize step 
 - [ ] Add more test cases
 - [ ] Add more functionality to the app
 - [ ] Buy a domain and add it to the cloud run
