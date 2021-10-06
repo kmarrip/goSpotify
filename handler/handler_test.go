@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,16 +13,24 @@ import (
 
 // This test work with ../templates/unauthorized.html path. I suggest to use Gin framework for improve routing manage and testing purpose
 func TestErrorAuthorization(t *testing.T) {
-	http.HandleFunc("/callback", TokenHandler)
-	go http.ListenAndServe(":8090", nil)
+	router := SetupRouter()
+	res := httptest.NewRecorder()
 
-	resp, err := http.Post("http://localhost:8090/callback?error=some_error", "application/json", nil)
-	if err != nil {
-		log.Fatal(err)
+	req := &http.Request{
+		Method: http.MethodPost,
+		Header: http.Header{
+			"content-type": []string{"application/json"},
+		},
+		URL: &url.URL{
+			Scheme:   "http",
+			Path:     "/callback",
+			RawQuery: "error=some_error",
+		},
 	}
 
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	router.ServeHTTP(res, req)
+
+	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
