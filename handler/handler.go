@@ -2,28 +2,35 @@ package handler
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
 	"github.com/chaithanyaMarripati/goSpotify/spotify"
 	"github.com/chaithanyaMarripati/goSpotify/token"
+	"github.com/gin-gonic/gin"
 )
 
-func BaseHandler(w http.ResponseWriter, r *http.Request) {
+func SetupRouter() *gin.Engine {
+	router := gin.Default()
+	router.LoadHTMLGlob("../templates/*")
+	router.GET("/", baseHandler)
+	router.POST("/callback", tokenHandler)
+	return router
+}
+
+func baseHandler(ctx *gin.Context) {
 	//1) check if the user has access token in the request
-	tokenCookie, err := r.Cookie("Token")
+	accessToken, err := ctx.Cookie("Token")
 	if err != nil {
 		fmt.Println("couldn't find the token cookie for this request")
 		fmt.Println("so redirecting it to the authorize url")
 		redirectedUrl := authorize.ConstructAuthorizeReq()
-		http.Redirect(w, r, redirectedUrl, http.StatusTemporaryRedirect)
+		ctx.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
 		return
 	}
 	//how we have the token cookie being sent to us for every request
 	//use this token cookie, to make requests to the spotify api
-	accessToken := tokenCookie.Value
 	name, err := spotify.CallSpotifyMe(accessToken)
 	if err != nil {
 		log.Panic(err)
@@ -36,41 +43,28 @@ func BaseHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if song == "" {
-		fmt.Fprintf(w, "name is %v", name)
+		ctx.String(http.StatusOK, "name is %v", name)
 		return
 	}
-	fmt.Fprintf(w, "name is %v\ncurrently listening to %v", name, song)
+
+	ctx.String(http.StatusOK, "name is %v\ncurrently listening to %v", name, song)
 }
 
-func TokenHandler(w http.ResponseWriter, r *http.Request) {
-	errorCode := r.URL.Query()["error"]
+func tokenHandler(ctx *gin.Context) {
+	errorCode := ctx.Query("error")
 	if len(errorCode) > 0 {
-		t := template.Must(template.ParseFiles("./templates/unauthorized.html"))
-		t.Execute(w, nil)
+		ctx.HTML(http.StatusInternalServerError, "unauthorized.html", nil)
 	} else {
-		authCode := r.URL.Query()["code"][0]
+		authCode := ctx.QueryArray("code")[0]
 
 		//now that we got the code exchange it with access token and refresh token and redirect with set cookie
 		token, err := token.GetTokenFromSpotify(authCode)
 		if err != nil {
-			fmt.Fprintf(w, "faced and issue with token generation")
+			ctx.String(http.StatusInternalServerError, "faced and issue with token generation")
 			return
 		}
-		accessTokenCookie := &http.Cookie{
-			Name:     "Token",
-			Value:    token.AccessToken,
-			Path:     "/",
-			SameSite: http.SameSiteDefaultMode,
-		}
-		refreshTokenCookie := &http.Cookie{
-			Name:     "RefreshToken",
-			Value:    token.RefreshToken,
-			Path:     "/",
-			SameSite: http.SameSiteDefaultMode,
-		}
-		http.SetCookie(w, accessTokenCookie)
-		http.SetCookie(w, refreshTokenCookie)
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		ctx.SetCookie("Token", token.AccessToken, 3600, "/", "", true, false)
+		ctx.SetCookie("RefreshToken", token.RefreshToken, 3600, "/", "", true, false)
+		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
-
 }

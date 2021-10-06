@@ -10,7 +10,6 @@ package main
 //end of project
 import (
 	"log"
-	"net/http"
 
 	"github.com/chaithanyaMarripati/goSpotify/config"
 	"github.com/chaithanyaMarripati/goSpotify/handler"
@@ -24,7 +23,10 @@ func main() {
 		log.Println("can't read env files, env should have already been set")
 	}
 	config.SetConfigVar()
-	http.HandleFunc("/callback", handler.TokenHandler)
-	http.HandleFunc("/", handler.BaseHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	router := handler.SetupRouter()
+
+	if err := router.Run(); err != nil {
+		log.Fatal(err)
+	}
 }
