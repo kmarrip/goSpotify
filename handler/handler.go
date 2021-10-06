@@ -13,9 +13,9 @@ import (
 
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
-	router.LoadHTMLGlob("../templates/*")
+	router.LoadHTMLFiles("../templates/*")
 	router.GET("/", baseHandler)
-	router.POST("/callback", tokenHandler)
+	router.GET("/callback", tokenHandler)
 	return router
 }
 
