@@ -22,11 +22,39 @@ type currentSong struct {
 	} `json:"item"`
 }
 
-func CallSpotifyCurrentSong(token string) (string, error) {
+type Spotify interface {
+	CurrentSong(accessToken string) (string, error)
+	Profile(accessToken string) (string, error)
+}
+
+type HttpSpotify struct{}
+
+func (s *HttpSpotify) CurrentSong(accessToken string) (string, error) {
+	getUserSpotify := config.EnvVariables.GetMeSpotify
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", getUserSpotify, nil)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return "", err
+	}
+
+	responsePayload := &meSpotify{}
+	json.Unmarshal(body, responsePayload)
+	return responsePayload.DisplayName, nil
+}
+
+func (s *HttpSpotify) Profile(accessToken string) (string, error) {
 	getCurrentSpotify := config.EnvVariables.CurrentlyPlaying
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getCurrentSpotify, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
+	req.Header.Set("Authorization", "Bearer "+accessToken)
 	res, err := client.Do(req)
 	if err != nil {
 		return "", err
@@ -44,25 +72,4 @@ func CallSpotifyCurrentSong(token string) (string, error) {
 	var responsePayload currentSong
 	json.Unmarshal(body, &responsePayload)
 	return responsePayload.Item.Album.Name, nil
-}
-func CallSpotifyMe(token string) (string, error) {
-	//call the spotify api for user name and current song
-	getUserSpotify := config.EnvVariables.GetMeSpotify
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", getUserSpotify, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	res, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return "", err
-	}
-
-	responsePayload := &meSpotify{}
-	json.Unmarshal(body, responsePayload)
-	return responsePayload.DisplayName, nil
 }
