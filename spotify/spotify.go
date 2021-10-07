@@ -14,12 +14,16 @@ import (
 type meSpotify struct {
 	DisplayName string `json:"display_name"`
 }
+
+type Album struct {
+	Name string `json:"name"`
+}
+
+type Item struct {
+	Album Album `json:"album"`
+}
 type currentSong struct {
-	Item struct {
-		Album struct {
-			Name string `json:"name"`
-		} `json:"album"`
-	} `json:"item"`
+	Item Item `json:"item"`
 }
 
 type Spotify interface {
@@ -29,8 +33,9 @@ type Spotify interface {
 
 type HttpSpotify struct{}
 
-func (s *HttpSpotify) CurrentSong(accessToken string) (string, error) {
+func (s *HttpSpotify) Profile(accessToken string) (string, error) {
 	getUserSpotify := config.EnvVariables.GetMeSpotify
+	println(getUserSpotify)
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getUserSpotify, nil)
 	req.Header.Set("Authorization", "Bearer "+accessToken)
@@ -50,7 +55,7 @@ func (s *HttpSpotify) CurrentSong(accessToken string) (string, error) {
 	return responsePayload.DisplayName, nil
 }
 
-func (s *HttpSpotify) Profile(accessToken string) (string, error) {
+func (s *HttpSpotify) CurrentSong(accessToken string) (string, error) {
 	getCurrentSpotify := config.EnvVariables.CurrentlyPlaying
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", getCurrentSpotify, nil)
@@ -71,5 +76,6 @@ func (s *HttpSpotify) Profile(accessToken string) (string, error) {
 
 	var responsePayload currentSong
 	json.Unmarshal(body, &responsePayload)
+	println(string(body))
 	return responsePayload.Item.Album.Name, nil
 }
