@@ -11,7 +11,7 @@ func CallbackApi() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		errorCode := context.Query("error")
 		if len(errorCode) > 0 {
-			context.HTML(http.StatusInternalServerError, "unauthorized.html", nil)
+			context.HTML(http.StatusOK, "unauthorized.html", nil)
 		} else {
 			authCode := context.QueryArray("code")[0]
 

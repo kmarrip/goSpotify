@@ -11,12 +11,22 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func setRouter(spotify mocks.SpotifyMock) *gin.Engine {
+	router := gin.Default()
+	gin.SetMode(gin.TestMode)
+	html := template.Must(template.ParseFiles("../templates/unauthorized.html"))
+	router.SetHTMLTemplate(html)
+	router.GET("/", MainApi(spotify))
+	router.GET("/callback", CallbackApi())
+	return router
+}
+
 func TestMainApiHandler(t *testing.T) {
 	spotify := mocks.SpotifyMock{}
 	spotify.On("CurrentSong", "aToken").Return("MySuperSong", nil)
 	spotify.On("Profile", "aToken").Return("MyName", nil)
 
-	router := router(spotify)
+	router := setRouter(spotify)
 	request, _ := http.NewRequest("GET", "/", nil)
 	request.AddCookie(&http.Cookie{Name: "Token", Value: "aToken"})
 
@@ -25,14 +35,4 @@ func TestMainApiHandler(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, response.Code)
 	spotify.AssertExpectations(t)
-
-}
-
-func router(spotify mocks.SpotifyMock) *gin.Engine {
-	router := gin.Default()
-	gin.SetMode(gin.TestMode)
-	html := template.Must(template.ParseFiles("../templates/unauthorized.html"))
-	router.SetHTMLTemplate(html)
-	router.GET("/", MainApi(spotify))
-	return router
 }
