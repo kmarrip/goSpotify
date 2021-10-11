@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 
@@ -25,7 +26,9 @@ func baseHandler(ctx *gin.Context) {
 	if err != nil {
 		fmt.Println("couldn't find the token cookie for this request")
 		fmt.Println("so redirecting it to the authorize url")
-		redirectedUrl := authorize.ConstructAuthorizeReq()
+		authState := uuid.New().String()
+		redirectedUrl := authorize.ConstructAuthorizeReq(authState)
+		ctx.SetCookie("State", authState, 120, "/", "", true, true)
 		ctx.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
 		return
 	}
@@ -56,15 +59,22 @@ func tokenHandler(ctx *gin.Context) {
 		ctx.HTML(http.StatusInternalServerError, "unauthorized.html", nil)
 	} else {
 		authCode := ctx.QueryArray("code")[0]
+		authState := ctx.QueryArray("state")[0]
+
+		stateCookieVal, err := ctx.Cookie("State")
+		if err != nil || authState != stateCookieVal {
+			ctx.String(http.StatusInternalServerError, "faced and issue with state verification")
+			return
+		}
 
 		//now that we got the code exchange it with access token and refresh token and redirect with set cookie
-		token, err := token.GetTokenFromSpotify(authCode)
+		authToken, err := token.GetTokenFromSpotify(authCode)
 		if err != nil {
 			ctx.String(http.StatusInternalServerError, "faced and issue with token generation")
 			return
 		}
-		ctx.SetCookie("Token", token.AccessToken, 3600, "/", "", true, false)
-		ctx.SetCookie("RefreshToken", token.RefreshToken, 3600, "/", "", true, false)
+		ctx.SetCookie("Token", authToken.AccessToken, 3600, "/", "", true, false)
+		ctx.SetCookie("RefreshToken", authToken.RefreshToken, 3600, "/", "", true, false)
 		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
