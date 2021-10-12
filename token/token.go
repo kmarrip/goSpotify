@@ -46,7 +46,7 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Panic(err)
+		log.Println(err)
 		return emptyTokenResponse, err
 	}
 

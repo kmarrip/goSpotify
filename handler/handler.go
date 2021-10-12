@@ -13,7 +13,7 @@ func MainApi(spotify spotify.Spotify) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		accessToken, err := context.Cookie("Token")
 		if err != nil {
-			log.Panic("Couldn't find the token cookie for this request, so redirecting it to the authorize url")
+			log.Println("Couldn't find the token cookie for this request, so redirecting it to the authorize url")
 			redirectedUrl := authorize.ConstructAuthorizeReq()
 			context.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
 			return
@@ -21,13 +21,13 @@ func MainApi(spotify spotify.Spotify) gin.HandlerFunc {
 
 		name, err := spotify.Profile(accessToken)
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
 			return
 		}
 
 		song, err := spotify.CurrentSong(accessToken)
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
 			return
 		}
 		if song == "" {
