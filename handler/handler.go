@@ -24,7 +24,6 @@ func SetupRouter() *gin.Engine {
 
 func baseHandler(ctx *gin.Context) {
 	//1) check if the user has access token in the request
-	var accessToken = new(http.Cookie)
 	accessToken, err := ctx.Request.Cookie("Token")
 	if err != nil || accessToken.Expires.Unix() < time.Now().Unix() {
 		fmt.Println("Token is expired or not found")
@@ -48,8 +47,9 @@ func baseHandler(ctx *gin.Context) {
 		if data.RefreshToken == "" {
 			data.RefreshToken = tok
 		}
+		
 		ctx.SetCookie("RefreshToken", data.RefreshToken, 3600 * 24 * 7, "/", "", true, false)
-		accessToken.Value = data.AccessToken
+		accessToken = &http.Cookie{Value: data.AccessToken}
 	}
 	//how we have the token cookie being sent to us for every request
 	//use this token cookie, to make requests to the spotify api
