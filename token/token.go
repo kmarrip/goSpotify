@@ -54,3 +54,24 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	json.Unmarshal(body, responsePayload)
 	return *responsePayload, nil
 }
+
+func RefreshSpotifyToken(refreshToken string) (tokenResponse, error) {
+	form := url.Values{}
+	form.Add("grant_type", "refresh_token")
+	form.Add("refresh_token", refreshToken)
+	form.Add("client_id", config.EnvVariables.ClientId)
+	form.Add("client_secret", config.EnvVariables.ClientSecret)
+
+	resp, err := http.Post(config.EnvVariables.TokenUrl, "application/x-www-form-urlencoded", strings.NewReader(form.Encode()))
+	if err != nil {
+		return tokenResponse{}, err
+	}
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return tokenResponse{}, err
+	}
+	fmt.Println(string(buf))
+	data := new(tokenResponse)
+	json.Unmarshal(buf, data)
+	return *data, nil
+}
