@@ -2,9 +2,11 @@ package handler
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
 	"github.com/chaithanyaMarripati/goSpotify/spotify"
@@ -22,10 +24,9 @@ func SetupRouter() *gin.Engine {
 
 func baseHandler(ctx *gin.Context) {
 	//1) check if the user has access token in the request
-	accessToken, err := ctx.Cookie("Token")
-	if err != nil {
-		fmt.Println("couldn't find the token cookie for this request")
-		fmt.Println("so redirecting it to the authorize url or refreshing cookie")
+	accessToken, err := ctx.Request.Cookie("Token")
+	if err != nil || accessToken.Expires.Unix() < time.Now().Unix() {
+		fmt.Println("Token is expired or not found")
 		authState := uuid.New().String()
 		redirectedUrl := authorize.ConstructAuthorizeReq(authState)
 
@@ -47,17 +48,17 @@ func baseHandler(ctx *gin.Context) {
 			data.RefreshToken = tok
 		}
 		ctx.SetCookie("RefreshToken", data.RefreshToken, 3600 * 24 * 7, "/", "", true, false)
-		accessToken = data.AccessToken
+		accessToken.Value = data.AccessToken
 	}
 	//how we have the token cookie being sent to us for every request
 	//use this token cookie, to make requests to the spotify api
-	name, err := spotify.CallSpotifyMe(accessToken)
+	name, err := spotify.CallSpotifyMe(accessToken.Value)
 	if err != nil {
 		log.Panic(err)
 		return
 	}
 
-	song, err := spotify.CallSpotifyCurrentSong(accessToken)
+	song, err := spotify.CallSpotifyCurrentSong(accessToken.Value)
 	if err != nil {
 		log.Panic(err)
 		return
