@@ -25,12 +25,29 @@ func baseHandler(ctx *gin.Context) {
 	accessToken, err := ctx.Cookie("Token")
 	if err != nil {
 		fmt.Println("couldn't find the token cookie for this request")
-		fmt.Println("so redirecting it to the authorize url")
+		fmt.Println("so redirecting it to the authorize url or refreshing cookie")
 		authState := uuid.New().String()
 		redirectedUrl := authorize.ConstructAuthorizeReq(authState)
-		ctx.SetCookie("State", authState, 120, "/", "", true, true)
-		ctx.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
-		return
+
+		tok, err := ctx.Cookie("RefreshToken")
+		if err != nil {
+			ctx.SetCookie("State", authState, 120, "/", "", true, true)
+			ctx.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
+			return
+		}
+
+		data, err := token.RefreshSpotifyToken(tok)
+		if err != nil {
+			ctx.SetCookie("State", authState, 120, "/", "", true, true)
+			ctx.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
+			return
+		}
+		ctx.SetCookie("Token", data.AccessToken, 3600, "/", "", true, false)
+		if data.RefreshToken == "" {
+			data.RefreshToken = tok
+		}
+		ctx.SetCookie("RefreshToken", data.RefreshToken, 3600 * 24 * 7, "/", "", true, false)
+		accessToken = data.AccessToken
 	}
 	//how we have the token cookie being sent to us for every request
 	//use this token cookie, to make requests to the spotify api
@@ -74,7 +91,7 @@ func tokenHandler(ctx *gin.Context) {
 			return
 		}
 		ctx.SetCookie("Token", authToken.AccessToken, 3600, "/", "", true, false)
-		ctx.SetCookie("RefreshToken", authToken.RefreshToken, 3600, "/", "", true, false)
+		ctx.SetCookie("RefreshToken", authToken.RefreshToken, 3600 * 24 * 7, "/", "", true, false)
 		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
