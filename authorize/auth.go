@@ -10,7 +10,7 @@ import (
 //this package handles the authorize part of the application
 //here the scopes for the auth request are handled
 
-func ConstructAuthorizeReq() string {
+func ConstructAuthorizeReq(state string) string {
 	log.Println("constructing the authorize request with scopes")
 
 	baseUrl := config.EnvVariables.BaseUrl
@@ -19,5 +19,6 @@ func ConstructAuthorizeReq() string {
 	params.Add("client_id", config.EnvVariables.ClientId)
 	params.Add("redirect_uri", config.EnvVariables.RedirectUri)
 	params.Add("scope", config.EnvVariables.Scopes)
+	params.Add("state", state)
 	return baseUrl + params.Encode()
 }
