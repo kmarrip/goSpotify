@@ -15,7 +15,7 @@ type tokenResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	TokenType    string `json:"token_type"`
-	ExpiresIn    string `json:"expires_in"`
+	ExpiresIn    int    `json:"expires_in"`
 	Scope        string `json:"scope"`
 }
 
@@ -51,6 +51,8 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	}
 
 	responsePayload := &tokenResponse{}
+	responsePayload.ExpiresIn -= 300 // 300 seconds are around 5 minutes
+
 	json.Unmarshal(body, responsePayload)
 	return *responsePayload, nil
 }

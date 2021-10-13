@@ -2,9 +2,10 @@ package handler
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
 	"github.com/chaithanyaMarripati/goSpotify/spotify"
@@ -73,8 +74,8 @@ func tokenHandler(ctx *gin.Context) {
 			ctx.String(http.StatusInternalServerError, "faced and issue with token generation")
 			return
 		}
-		ctx.SetCookie("Token", authToken.AccessToken, 3600, "/", "", true, false)
-		ctx.SetCookie("RefreshToken", authToken.RefreshToken, 3600, "/", "", true, false)
+		ctx.SetCookie("Token", authToken.AccessToken, authToken.ExpiresIn, "/", "", true, false)
+		ctx.SetCookie("RefreshToken", authToken.RefreshToken, authToken.ExpiresIn, "/", "", true, false)
 		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
