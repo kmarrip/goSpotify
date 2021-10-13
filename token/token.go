@@ -70,7 +70,6 @@ func RefreshSpotifyToken(refreshToken string) (tokenResponse, error) {
 	if err != nil {
 		return tokenResponse{}, err
 	}
-	fmt.Println(string(buf))
 	data := new(tokenResponse)
 	json.Unmarshal(buf, data)
 	return *data, nil
