@@ -24,6 +24,7 @@ func SetupRouter() *gin.Engine {
 
 func baseHandler(ctx *gin.Context) {
 	//1) check if the user has access token in the request
+	var accessToken = new(http.Cookie)
 	accessToken, err := ctx.Request.Cookie("Token")
 	if err != nil || accessToken.Expires.Unix() < time.Now().Unix() {
 		fmt.Println("Token is expired or not found")
