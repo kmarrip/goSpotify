@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
+	"strconv"
+	"time"
 
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
 	"github.com/chaithanyaMarripati/goSpotify/spotify"
 	"github.com/chaithanyaMarripati/goSpotify/token"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func SetupRouter() *gin.Engine {
@@ -21,10 +22,31 @@ func SetupRouter() *gin.Engine {
 	return router
 }
 
+func checkExpiration(ctx *gin.Context) bool {
+
+	expirationDate, exp_err := ctx.Cookie("ExpirationDate")
+
+	if exp_err == nil {
+
+		exp_time, parse_error := strconv.ParseInt(expirationDate, 10, 64)
+
+		if parse_error == nil {
+
+			delta := exp_time - time.Now().Unix()
+
+			// 300 seconds are around 5 minutes
+			return delta < 300
+		}
+	}
+
+	return true
+}
+
 func baseHandler(ctx *gin.Context) {
 	//1) check if the user has access token in the request
-	accessToken, err := ctx.Cookie("Token")
-	if err != nil {
+	accessToken, token_err := ctx.Cookie("Token")
+
+	if token_err != nil || checkExpiration(ctx) == true {
 		fmt.Println("couldn't find the token cookie for this request")
 		fmt.Println("so redirecting it to the authorize url")
 		authState := uuid.New().String()
@@ -74,8 +96,9 @@ func tokenHandler(ctx *gin.Context) {
 			ctx.String(http.StatusInternalServerError, "faced and issue with token generation")
 			return
 		}
-		ctx.SetCookie("Token", authToken.AccessToken, authToken.ExpiresIn, "/", "", true, false)
-		ctx.SetCookie("RefreshToken", authToken.RefreshToken, authToken.ExpiresIn, "/", "", true, false)
+		ctx.SetCookie("Token", authToken.AccessToken, 3600, "/", "", true, false)
+		ctx.SetCookie("RefreshToken", authToken.RefreshToken, 3600, "/", "", true, false)
+		ctx.SetCookie("ExpirationDate", authToken.ExpiresIn, 3600, "/", "", true, false)
 		ctx.Redirect(http.StatusTemporaryRedirect, "/")
 	}
 }
