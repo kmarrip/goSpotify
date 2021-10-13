@@ -32,10 +32,10 @@
 
 # Todo list 
 these are the pending action items, list will be updated overtime
-- [ ] Add state in the url parmas when the user is redirected, to protect against csrf attacks
+- [x] Add state in the url parmas when the user is redirected, to protect against csrf attacks
 - [ ] After successful authentication return a html page instead of text
 - [x] Add error page for errors during /authorize step 
-- [ ] Add more test cases
+- [x] Add more test cases
 - [ ] Add more functionality to the app
 - [ ] Buy a domain and add it to the cloud run
 
