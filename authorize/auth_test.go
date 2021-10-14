@@ -15,7 +15,7 @@ func TestConstructAuthorizeReq(t *testing.T) {
 	os.Setenv("scopes", "aScope")
 	config.SetConfigVar()
 
-	req := ConstructAuthorizeReq()
+	req := ConstructAuthorizeReq("aState")
 
-	assert.Equal(t, "baseUrlclient_id=aClient&redirect_uri=aRedirectUri&response_type=code&scope=aScope", req)
+	assert.Equal(t, "baseUrlclient_id=aClient&redirect_uri=aRedirectUri&response_type=code&scope=aScope&state=aState", req)
 }

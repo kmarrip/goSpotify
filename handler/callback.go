@@ -14,6 +14,13 @@ func CallbackApi() gin.HandlerFunc {
 			context.HTML(http.StatusOK, "unauthorized.html", nil)
 		} else {
 			authCode := context.QueryArray("code")[0]
+			authState := context.QueryArray("state")[0]
+
+			stateCookieVal, err := context.Cookie("State")
+			if err != nil || authState != stateCookieVal {
+				context.String(http.StatusInternalServerError, "faced and issue with state verification")
+				return
+			}
 
 			//now that we got the code exchange it with access token and refresh token and redirect with set cookie
 			token, err := token.GetTokenFromSpotify(authCode)

@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+
 	"github.com/chaithanyaMarripati/goSpotify/authorize"
 	"github.com/chaithanyaMarripati/goSpotify/spotify"
 	"github.com/gin-gonic/gin"
@@ -14,7 +16,9 @@ func MainApi(spotify spotify.Spotify) gin.HandlerFunc {
 		accessToken, err := context.Cookie("Token")
 		if err != nil {
 			log.Println("Couldn't find the token cookie for this request, so redirecting it to the authorize url")
-			redirectedUrl := authorize.ConstructAuthorizeReq()
+			authState := uuid.New().String()
+			redirectedUrl := authorize.ConstructAuthorizeReq(authState)
+			context.SetCookie("State", authState, 120, "/", "", true, true)
 			context.Redirect(http.StatusTemporaryRedirect, redirectedUrl)
 			return
 		}
