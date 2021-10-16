@@ -2,8 +2,8 @@ package token
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -46,7 +46,7 @@ func GetTokenFromSpotify(code string) (tokenResponse, error) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return emptyTokenResponse, err
 	}
 

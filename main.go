@@ -13,6 +13,8 @@ import (
 
 	"github.com/chaithanyaMarripati/goSpotify/config"
 	"github.com/chaithanyaMarripati/goSpotify/handler"
+	"github.com/chaithanyaMarripati/goSpotify/spotify"
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
 
@@ -24,7 +26,11 @@ func main() {
 	}
 	config.SetConfigVar()
 
-	router := handler.SetupRouter()
+	spotify := spotify.HttpSpotify{}
+	router := gin.Default()
+	router.LoadHTMLFiles("../templates/*")
+	router.GET("/", handler.MainApi(&spotify))
+	router.GET("/callback", handler.CallbackApi())
 
 	if err := router.Run(); err != nil {
 		log.Fatal(err)
