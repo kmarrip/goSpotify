@@ -6,6 +6,12 @@
 ## join [goSpotify](https://discord.gg/vQUaPhbp) discord server
 
 # QuickStart
+
+This project makes use of git hooks, before committing execute this line: 
+```
+git config core.hooksPath .githooks
+```
+
 1. [Install Docker](https://docs.docker.com/engine/install/).
 2. Go to https://developer.spotify.com/ and login/register
 3. In dashboard add a new app, so in `edit settings` add this redirect url http://localhost:8080/callback
