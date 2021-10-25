@@ -11,6 +11,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type MainData struct {
+	Name string
+	Song string
+}
+
 func MainApi(spotify spotify.Spotify) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		accessToken, err := context.Cookie("Token")
@@ -34,11 +39,7 @@ func MainApi(spotify spotify.Spotify) gin.HandlerFunc {
 			log.Println(err)
 			return
 		}
-		if song == "" {
-			context.String(http.StatusOK, "name is %v", name)
-			return
-		}
 
-		context.String(http.StatusOK, "name is %v\ncurrently listening to %v", name, song)
+		context.HTML(http.StatusOK, "main.html", MainData{Name: name, Song: song})
 	}
 }
